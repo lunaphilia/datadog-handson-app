@@ -1,0 +1,29 @@
+version: "3"
+services:
+  mysql:
+    image: mysql:5.7
+    ports:
+      - '3306:3306'
+    command: "mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_bin --default-time-zone='+9:00'"
+    environment:
+      MYSQL_DATABASE: sample
+      MYSQL_USER: sample
+      MYSQL_PASSWORD: samplesample
+    volumes:
+      - mysql-data:/var/lib/mysql
+  sample:
+    build: .
+    ports:
+      - '80:80'
+    environment:
+      DBUSER: sample
+      DBPASS: samplesample
+      DBADDRESS: mysql
+      DBPORT: 3306
+      DBNAME: sample
+    restart: always
+    depends_on:
+      - mysql
+
+volumes:
+  mysql-data:
