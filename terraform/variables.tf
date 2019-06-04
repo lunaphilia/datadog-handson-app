@@ -21,5 +21,6 @@ locals {
     database_address  = "/sample-default/db/database_endpoint"
     database_user     = "/sample-default/db/master_username"
     database_password = "/sample-default/db/master_password"
+    dd_api_key        = "/sample-default/datadog/api_key"
   }
 }

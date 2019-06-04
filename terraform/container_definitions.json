@@ -43,5 +43,43 @@
         "value": "sample"
       }
     ]
+  },
+  {
+    "name": "datadog",
+    "image": "datadog/agent:${dd_image_tag}",
+    "cpu": 10,
+    "memory": 256,
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-region": "${region}",
+        "awslogs-stream-prefix": "datadog",
+        "awslogs-group": "/${name}/datadog"
+      }
+    },
+    "secrets": [
+      {
+        "name": "DD_API_KEY",
+        "valueFrom": "${dd_api_key}"
+      }
+    ],
+    "environment": [
+      {
+        "name": "DD_APM_ENABLED",
+        "value": "true"
+      },
+      {
+        "name": "ECS_FARGATE",
+        "value": "true"
+      },
+      {
+        "name": "DD_TAGS",
+        "value": "env:${env}"
+      },
+      {
+        "name": "DD_APM_ENV",
+        "value": "${env}"
+      }
+    ]
   }
 ]

@@ -6,7 +6,10 @@ import (
 	"net/http"
 	"database/sql"
 	log "github.com/sirupsen/logrus"
-	_ "github.com/go-sql-driver/mysql"
+	mysql "github.com/go-sql-driver/mysql"
+	httptrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/net/http"
+	sqltrace "gopkg.in/DataDog/dd-trace-go.v1/contrib/database/sql"
+	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
 )
 
 type Server struct {
@@ -37,7 +40,8 @@ func DatabaseOpen() *sql.DB {
 	dbport := os.Getenv("DBPORT")
 	dbname:= os.Getenv("DBNAME")
 
-	db, err := sql.Open("mysql", dbuser + ":" + dbpass + "@tcp("+ dbaddress + ":" + dbport + ")/" + dbname)
+	sqltrace.Register("mysql", &mysql.MySQLDriver{}, sqltrace.WithServiceName("sample-db"))
+	db, err := sqltrace.Open("mysql", dbuser + ":" + dbpass + "@tcp("+ dbaddress + ":" + dbport + ")/" + dbname)
 
 	if err != nil {
         panic(err)
@@ -52,6 +56,8 @@ func DatabaseOpen() *sql.DB {
 }
 
 func main() {
+    tracer.Start(tracer.WithServiceName("sample"))
+    defer tracer.Stop()
 
 	log.SetFormatter(&log.JSONFormatter{})
 	log.Info("start")
@@ -60,7 +66,7 @@ func main() {
 	defer db.Close()
 
 	s := Server{db : db}
-	mux := http.NewServeMux()
+	mux := httptrace.NewServeMux()
 	mux.HandleFunc("/ping", s.Ping)
 	mux.HandleFunc("/deep_ping", s.DeepPing)
 	http.ListenAndServe(":80", mux)

@@ -66,6 +66,9 @@ data "template_file" "container_definitions" {
     database_address            = "${local.workspace["database_address"]}"
     database_user               = "${local.workspace["database_user"]}"
     database_password           = "${local.workspace["database_password"]}"
+    dd_image_tag                = "latest"
+    dd_api_key                  = "${local.workspace["dd_api_key"]}"
+    env                         = "${terraform.workspace}"
   }
 }
 
@@ -79,7 +82,7 @@ module "ecs_service" {
 
   ecs_cluster_name        = "${data.terraform_remote_state.infra.ecs_cluster_name}"
   main_container_name     = "sample"
-  task_log_names          = ["ecs"]
+  task_log_names          = ["ecs", "datadog"]
   service_security_groups = ["${module.svc_sg.sg_id}"]
   container_definitions   = "${data.template_file.container_definitions.rendered}"
   alb_listener_arn        = "${data.terraform_remote_state.infra.http_listener_arn}"
